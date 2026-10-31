@@ -1,7 +1,7 @@
 from django.core import serializers
 from django.http import JsonResponse
 from jf3qApp.models import Users
-from jf3qApp.utils import md5Util, pageUtil
+from jf3qApp.utils import md5Util, pageUtil, dateUtil
 from django.forms.models import model_to_dict
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -51,5 +51,37 @@ def page(request):
     serializer = UsersSerializer(page_info['list'],many=True)
     page_info['list'] = serializer.data
     data = ({'status':1,'msg':'search success', 'obj':page_info})
+
+    return JsonResponse(data)
+
+def add(request):
+    nickname = request.POST.get('nickname')
+    phone = request.POST.get('phone')
+    lu = Users.objects.filter(phone=phone).first()
+    if lu:
+        data = {'status':0, 'msg':'user already exists, command failed'}
+        return JsonResponse(data)
+    sex = request.POST.get('sex')
+    age = request.POST.get('age')
+    if age == '':
+        age = None
+    school = request.POST.get('school')
+    email = request.POST.get('email')
+    ulike = request.POST.get('ulike')
+    major = request.POST.get('major')
+    cts = dateUtil.get_now_ts()
+    upass = md5Util.get_default_pwd()
+    Users.objects.create(nickname=nickname,
+                        phone=phone,
+                        sex=sex,
+                        age=age,
+                        school=school,
+                        email=email,
+                        ulike=ulike,
+                        major=major,
+                        cts=cts,
+                        upass=upass,)
+
+    data = ({'status':1,'msg':'add success'})
 
     return JsonResponse(data)
