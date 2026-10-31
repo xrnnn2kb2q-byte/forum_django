@@ -24,4 +24,5 @@ urlpatterns = [
     path('users/page',userViews.page),
     path('users/save',userViews.save),
     path('users/upfaceimg',userViews.upfaceimg),
+    path('users/del',userViews.del_one),
 ]

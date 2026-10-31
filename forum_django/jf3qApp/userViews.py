@@ -127,3 +127,16 @@ def upfaceimg(request):
     else:
         data = {'status':0,'msg':'upload failed'}
         return JsonResponse(data)
+
+def del_one(request):
+    id = request.POST.get('id')
+    if id:
+        lu = Users.objects.filter(id=id).first()
+        if lu:
+            Users.objects.filter(id=id).delete()
+            uploadUtil.delfile(lu.faceimg)
+            data = {'status':1,'msg':'delete success'}
+            return JsonResponse(data)
+        else:
+            data = {'status':0,'msg':'delete failed'}
+            return JsonResponse(data)
