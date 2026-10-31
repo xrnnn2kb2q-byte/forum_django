@@ -21,4 +21,5 @@ from forum_django.jf3qApp import userViews
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/login',userViews.login),
+    path('users/page',userViews.page),
 ]
