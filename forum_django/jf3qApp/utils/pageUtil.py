@@ -1,22 +1,22 @@
+from django.core.paginator import Paginator
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-def get_page(all,page_no,page_size=10):
-    if page_no:
-        page_no = int(page_no)
-    else:
-        page_no = 1
-
-    paginator = Paginator(all, 10)
-
-    total = paginator.count
-
+def get_page(queryset, page_no=1, page_size=10):
     try:
-        page_pbj = paginator.page(page_no)
-    except PageNotAnInteger:
-        page_pbj = paginator.page(1)
-    except EmptyPage:
-        page_pbj = paginator.page(paginator.num_pages)
-    list = page_pbj.object_list
+        page_no = int(page_no or 1)
+        page_size = int(page_size or 10)
+    except (TypeError, ValueError):
+        raise ValueError('pageNo and pageSize must be integers')
+    if page_no < 1:
+        raise ValueError('pageNo must be at least 1')
+    if page_size < 1 or page_size > 100:
+        raise ValueError('pageSize must be between 1 and 100')
 
-    return {'total':total,'list':list}
+    paginator = Paginator(queryset, page_size)
+    page = paginator.get_page(page_no)
+    return {
+        'total': paginator.count,
+        'pageNo': page.number,
+        'pageSize': page_size,
+        'list': page.object_list,
+    }

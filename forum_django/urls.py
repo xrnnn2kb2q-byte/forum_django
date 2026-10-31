@@ -20,9 +20,13 @@ from forum_django.jf3qApp import userViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('users/csrf', userViews.csrf_token),
     path('users/login',userViews.login),
-    path('users/page',userViews.page),
+    path('users/page',userViews.save),
     path('users/save',userViews.save),
+    path('users/add',userViews.add),
     path('users/upfaceimg',userViews.upfaceimg),
     path('users/del',userViews.del_one),
+    path('users/initpwd',userViews.init_pwd),
+    path('users/change_state',userViews.change_state),
 ]
