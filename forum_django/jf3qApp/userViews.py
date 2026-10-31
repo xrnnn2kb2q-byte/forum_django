@@ -1,8 +1,9 @@
 from django.core import serializers
 from django.http import JsonResponse
-from jf3qApp.models import Users
-from jf3qApp.utils import md5Util, pageUtil, dateUtil
+from forum_django.jf3qApp.models import Users
+from forum_django.jf3qApp.utils import md5Util, pageUtil, dateUtil
 from django.forms.models import model_to_dict
+from rest_framework import serializers
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,7 +32,7 @@ def login(request):
         data = {'status':0,'msg':'Account or password is incorrect'}
         return JsonResponse(data)
 
-def page(request):
+def save(request):
     query_data = {}
     pageNo = request.POST.get('pageNo')
     pageSize = request.POST.get('pageSize')
@@ -55,12 +56,10 @@ def page(request):
     return JsonResponse(data)
 
 def add(request):
+    id = request.POST.get('id')
     nickname = request.POST.get('nickname')
     phone = request.POST.get('phone')
     lu = Users.objects.filter(phone=phone).first()
-    if lu:
-        data = {'status':0, 'msg':'user already exists, command failed'}
-        return JsonResponse(data)
     sex = request.POST.get('sex')
     age = request.POST.get('age')
     if age == '':
@@ -71,6 +70,26 @@ def add(request):
     major = request.POST.get('major')
     cts = dateUtil.get_now_ts()
     upass = md5Util.get_default_pwd()
+    if id:
+        if lu and lu.id != int(id):
+            data = {'status':0,'msg':'user already exists, command failed'}
+            return JsonResponse(data)
+        Users.objects.filter(id=id).update(
+                        nickname=nickname,
+                        phone=phone,
+                        sex=sex,
+                        age=age,
+                        school=school,
+                        email=email,
+                        ulike=ulike,
+                        major=major,)
+        data={'status':1,'msg':'update success'}
+        return JsonResponse(data)
+    else:
+        if lu:
+            data = {'status':0, 'msg':'user already exists, command failed'}
+            return JsonResponse(data)
+
     Users.objects.create(nickname=nickname,
                         phone=phone,
                         sex=sex,
@@ -80,7 +99,9 @@ def add(request):
                         ulike=ulike,
                         major=major,
                         cts=cts,
-                        upass=upass,)
+                        upass=upass,
+                        state='1',
+                        role='pt')
 
     data = ({'status':1,'msg':'add success'})
 
