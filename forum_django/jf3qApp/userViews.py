@@ -1,7 +1,8 @@
+from django.contrib.sessions.backends import file
 from django.core import serializers
 from django.http import JsonResponse
 from forum_django.jf3qApp.models import Users
-from forum_django.jf3qApp.utils import md5Util, pageUtil, dateUtil
+from forum_django.jf3qApp.utils import md5Util, pageUtil, dateUtil, uploadUtil
 from django.forms.models import model_to_dict
 from rest_framework import serializers
 
@@ -70,6 +71,11 @@ def add(request):
     major = request.POST.get('major')
     cts = dateUtil.get_now_ts()
     upass = md5Util.get_default_pwd()
+    faceimg = request.POST.get('faceimg')
+    if faceimg == '':
+        faceimg = uploadUtil.get_default_img()
+
+
     if id:
         if lu and lu.id != int(id):
             data = {'status':0,'msg':'user already exists, command failed'}
@@ -82,14 +88,14 @@ def add(request):
                         school=school,
                         email=email,
                         ulike=ulike,
-                        major=major,)
+                        major=major,
+                        faceimg=faceimg,)
         data={'status':1,'msg':'update success'}
         return JsonResponse(data)
     else:
         if lu:
             data = {'status':0, 'msg':'user already exists, command failed'}
             return JsonResponse(data)
-
     Users.objects.create(nickname=nickname,
                         phone=phone,
                         sex=sex,
@@ -106,3 +112,18 @@ def add(request):
     data = ({'status':1,'msg':'add success'})
 
     return JsonResponse(data)
+
+def upfaceimg(request):
+    id = request.POST.get('id')
+    file = request.FILES.get('file')
+    if file:
+        faceimg = uploadUtil.upload(file,'faceimg')
+        if id:
+            lu = Users.objects.filter(id=id).first()
+            Users.objects.filter(id=id).update(faceimg=faceimg)
+            uploadUtil.delfile(lu.faceimg)
+        data = {'status':1,'msg':'upload success','obj':faceimg}
+        return JsonResponse(data)
+    else:
+        data = {'status':0,'msg':'upload failed'}
+        return JsonResponse(data)

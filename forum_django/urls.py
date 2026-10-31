@@ -23,4 +23,5 @@ urlpatterns = [
     path('users/login',userViews.login),
     path('users/page',userViews.page),
     path('users/save',userViews.save),
+    path('users/upfaceimg',userViews.upfaceimg),
 ]
